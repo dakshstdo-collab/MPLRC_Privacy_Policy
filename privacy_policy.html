@@ -1,23 +1,138 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
 
-Privacy Policy for MPLRC 1959
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
 
-1. Information We Collect
-MPLRC 1959 is a simple offline document viewer. We do not collect, store, or transmit any personal data from you. All app data is stored locally on your device.
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
 
->2. How We Use Your Information
-The app does not collect any information, so there is no information to use.
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Diversion Calc</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #FFC68D;
+            color: #4c3100;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+        h1, h2 {
+            color: #814922;
+            text-align: center;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 20px;
+            margin-top: 30px;
+            border-bottom: 2px solid #D87A3A;
+            padding-bottom: 5px;
+        }
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        ul {
+            margin-bottom: 15px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        .contact {
+            background-color: #FFBF7E;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Privacy Policy</h1>
+    <p><strong>Effective Date: October 24, 2025</strong></p>
+    <p>Diversion Calc ("App", "we", "us", or "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application. Please read this Privacy Policy carefully. If you do not agree with the terms of this Privacy Policy, please do not access the App.</p>
 
-3. Information Sharing
-We do not share any information with third parties as no data is collected.
+    <h2>1. Information We Collect</h2>
+    <p>We do not collect any personal information from users. The App operates entirely offline and uses only local data for calculations.</p>
+    <ul>
+        <li><strong>No Personal Data:</strong> We do not collect names, email addresses, phone numbers, or any identifiable information.</li>
+        <li><strong>Local Inputs:</strong> User inputs such as area measurements (e.g., square feet, hectares) and selections (e.g., tehsil, village, diversion type) are processed locally on your device and are not transmitted to any servers.</li>
+        <li><strong>Local Database:</strong> The App uses a pre-loaded database (villages.db) stored in the app's assets for village and local body information. This data is static and does not include user-specific information.</li>
+    </ul>
 
-4. Data Security
-The app functions completely offline. The security of any data related to the app depends on the security of your device.
+    <h2>2. How We Use Your Information</h2>
+    <p>Since no personal information is collected, we do not use any user data for any purpose. All calculations are performed locally to provide estimates for land diversion rates based on government guidelines for Bhopal, Madhya Pradesh.</p>
+    <ul>
+        <li><strong>Local Processing:</strong> Inputs are used solely for on-device calculations and are not stored or shared.</li>
+        <li><strong>No Analytics or Tracking:</strong> The App does not use analytics services, cookies, or tracking mechanisms.</li>
+    </ul>
 
-5. Children's Privacy
-Our application is not intended for use by children under the age of 13. We do not knowingly collect any personal information from children.
+    <h2>3. Information We Share</h2>
+    <p>We do not share any user information with third parties. As no data is collected, there is nothing to share.</p>
+    <ul>
+        <li><strong>No Data Sharing:</strong> No user data is shared with advertisers, partners, or any external entities.</li>
+        <li><strong>Local Only:</strong> All operations are confined to the user's device.</li>
+    </ul>
 
-6. Changes to This Policy
-We may update this privacy policy from time to time. We will notify you of any changes by posting the new policy in this section of the app.
+    <h2>4. Security</h2>
+    <p>We take reasonable measures to protect the limited local data processed by the App.</p>
+    <ul>
+        <li><strong>Local Storage:</strong> User inputs are not saved persistently and are cleared upon app closure or reset.</li>
+        <li><strong>Offline Operation:</strong> No data is transmitted over networks, eliminating risks associated with data transmission.</li>
+    </ul>
 
-7. Contact Us
-If you have any questions about this privacy policy, you can contact us at dakshstdo@gmail.com
+    <h2>5. Children's Privacy</h2>
+    <p>The App is not intended for children under the age of 13. We do not knowingly collect personal information from children under 13.</p>
+
+    <h2>6. Changes to This Privacy Policy</h2>
+    <p>We may update this Privacy Policy from time to time. The updated version will be posted here with a revised "Effective Date." Continued use of the App after any changes constitutes acceptance of the new Privacy Policy.</p>
+
+    <h2>7. Contact Us</h2>
+    <div class="contact">
+        <p>If you have questions or comments about this Privacy Policy, please contact us at:</p>
+        <p><strong>Email:</strong> dakshstdo@gmail.com</p>
+        <p><strong>App Developer:</strong> Geetanjali & Kush Gupta</p>
+        <p><strong>Address:</strong> Bhopal, Madhya Pradesh, India</p>
+    </div>
+
+    <p><em>This Privacy Policy is provided in compliance with Google Play Store guidelines and applicable privacy laws. Last updated: October 24, 2025.</em></p>
+</body>
+</html>
